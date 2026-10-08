@@ -7,7 +7,7 @@ export default function Catalog() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    request("/games")
+    request("/games?order=created_at.desc")
       .then(setGames)
       .catch((err) => console.error("Failed to fetch games:", err))
       .finally(() => setLoading(false));

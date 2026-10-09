@@ -8,13 +8,14 @@ export default function Home() {
     useEffect(() => {
         const abortController = new AbortController();
 
-        request("/games?order=created_at.desc&limit=3")
+        request("/games?order=created_at.desc&limit=3", 'GET', null, { signal: abortController.signal })
             .then(result => setLatestGames(result))
             .catch(error => console.error(error));
 
             return () => {
-
+                abortController.abort();
             }
+
     }, []);
 
     return (

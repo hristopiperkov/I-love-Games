@@ -1,7 +1,7 @@
 
 const url = "https://wtqjbplnkqgkwhcxxwja.supabase.co/rest/v1/";
 
-export default async function request(path = "/", method = "GET", data = null) {
+export default async function request(path = "/", method = "GET", data = null, opts = {}) {
     const options = {
         method,
         headers: {

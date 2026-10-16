@@ -1,4 +1,31 @@
+import { useEffect, useState } from "react";
+import { useParams } from "react-router";
+import request from "../../utils/request";
+
+const initialValues = {
+    title: "",
+    genre: "",
+    activePlayers: "",
+    releaseDate: "",
+    imageUrl: "",
+    summary: ""
+};
+
 export default function GameEdit() {
+    const { gameId } = useParams();
+    const [game, setGame] = useState(initialValues);
+
+    const changeHandler = (e) => {
+        setGame(state => ({
+            ...state,
+            [e.target.name]: e.target.value
+        }));
+    };
+
+    useEffect(() => {
+        request(`/games?id=eq.${gameId}`)
+        .then(data => setGame(data[0]))
+    }, [gameId]);
     return (
         <section id="edit-page">
             <form id="add-new-game">
@@ -11,8 +38,10 @@ export default function GameEdit() {
                         <input
                             type="text"
                             id="gameName"
-                            name="gameName"
+                            name="title"
                             placeholder="Enter game title..."
+                            value={game.title}
+                            onChange={changeHandler}
                         />
                     </div>
 
@@ -23,6 +52,8 @@ export default function GameEdit() {
                             id="genre"
                             name="genre"
                             placeholder="Enter game genre..."
+                            value={game.genre}
+                            onChange={changeHandler}
                         />
                     </div>
 
@@ -34,6 +65,8 @@ export default function GameEdit() {
                             name="activePlayers"
                             min="0"
                             placeholder="0"
+                            value={game.activePlayers}
+                            onChange={changeHandler}
                         />
                     </div>
 
@@ -43,16 +76,20 @@ export default function GameEdit() {
                             type="date"
                             id="releaseDate"
                             name="releaseDate"
+                            value={game.releaseDate}
+                            onChange={changeHandler}
                         />
                     </div>
 
                     <div className="form-group-full">
-                        <label htmlFor="imageUrl">Image URL:</label>
+                        <label htmlFor="imgUrl">Image URL:</label>
                         <input
                             type="text"
-                            id="imageUrl"
-                            name="imageUrl"
+                            id="imgUrl"
+                            name="imgUrl"
                             placeholder="Enter image URL..."
+                            value={game.imgUrl}
+                            onChange={changeHandler}
                         />
                     </div>
 
@@ -63,6 +100,8 @@ export default function GameEdit() {
                             id="summary"
                             rows="5"
                             placeholder="Write a brief summary..."
+                            value={game.summary}
+                            onChange={changeHandler}
                         ></textarea>
                     </div>
 

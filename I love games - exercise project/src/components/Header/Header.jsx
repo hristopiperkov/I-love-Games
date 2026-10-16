@@ -1,6 +1,8 @@
 import { Link } from "react-router";
 
-export default function Header() {
+export default function Header({
+  user,
+}) {
     return (
         <header>
         {/* Navigation */}
@@ -11,16 +13,18 @@ export default function Header() {
           <Link to="/catalog">Catalog</Link>
 
           {/* Logged-in users */}
+          {user
+            ? (
           <div id="user">
             <Link to="/games/create">Add Game</Link>
             <Link to="/">Logout</Link>
           </div>
-
-          {/* Guest users */}
-          <div id="guest">
+            )
+            : (<div id="guest">
             <Link to="/login">Login</Link>
             <Link to="/register">Register</Link>
-          </div>
+          </div>)
+    }
         </nav>
       </header>
     );

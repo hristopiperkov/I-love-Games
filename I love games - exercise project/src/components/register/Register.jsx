@@ -1,13 +1,10 @@
-import { useState } from "react";
 import { useNavigate } from "react-router";
 
-export default function Register() {
-    const [user, setUser] = useState(null);
+export default function Register({ onRegister}) {
     
+    const navigate = useNavigate();
+
     const registerHandler = (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData(e.target);
         const email = formData.get("email");
         const password = formData.get("password");
         const confirmPassword = formData.get("confirm-password");
@@ -22,14 +19,14 @@ export default function Register() {
             return;
         }
 
-        setUser ({ email });
+        onRegister ({ email });
 
         navigate("/");
     };
 
     return (
         <section id="register-page" className="content auth">
-            <form id="register" onSubmit={registerHandler}>
+            <form id="register" action={registerHandler}>
                 <div className="container">
                     <div className="brand-logo"></div>
 

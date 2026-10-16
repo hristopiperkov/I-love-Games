@@ -1,31 +1,27 @@
 import { Link } from "react-router";
 
-export default function Header({
-  user,
-}) {
+export default function Header({ user }) {
     return (
         <header>
-        {/* Navigation */}
-        <nav>
-          <Link to="/" className="home" href="/">
-            <img src="./images/logo.png" alt="logo" /></Link>
+            <nav>
+                <Link to="/" className="home">
+                    <img src="/images/logo.png" alt="logo" />
+                </Link>
 
-          <Link to="/catalog">Catalog</Link>
+                <Link to="/catalog">Catalog</Link>
 
-          {/* Logged-in users */}
-          {user
-            ? (
-          <div id="user">
-            <Link to="/games/create">Add Game</Link>
-            <Link to="/">Logout</Link>
-          </div>
-            )
-            : (<div id="guest">
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
-          </div>)
-    }
-        </nav>
-      </header>
+                {user ? (
+                    <div id="user">
+                        <Link to="/games/create">Add Game</Link>
+                        <Link to="/logout">Logout</Link>
+                    </div>
+                ) : (
+                    <div id="guest">
+                        <Link to="/login">Login</Link>
+                        <Link to="/register">Register</Link>
+                    </div>
+                )}
+            </nav>
+        </header>
     );
 }

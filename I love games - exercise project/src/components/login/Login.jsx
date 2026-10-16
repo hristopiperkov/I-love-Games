@@ -1,7 +1,25 @@
-export default function Login() {
+
+import { useNavigate } from "react-router";
+
+export default function Login({ onLogin }) {
+    const navigate = useNavigate();
+
+    const submitAction = (formData) => {
+        const { email, password } = Object.fromEntries(formData);
+
+        if (!email || !password) {
+            alert("Email and password are required");
+            return;
+        }
+
+        onLogin({ email });
+
+        navigate("/");
+    };
+
     return (
         <section id="login-page">
-            <form id="login">
+            <form id="login" action={submitAction}>
                 <div className="container">
                     <h1>Login</h1>
 
@@ -11,6 +29,7 @@ export default function Login() {
                         id="email"
                         name="email"
                         placeholder="Your Email"
+                        required
                     />
 
                     <label htmlFor="login-password">Password</label>
@@ -19,6 +38,7 @@ export default function Login() {
                         id="login-password"
                         name="password"
                         placeholder="Password"
+                        required
                     />
 
                     <input

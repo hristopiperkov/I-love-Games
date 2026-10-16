@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import request from "../../utils/request";
+import CreateComment from "../create-comment/CreateComment";
 
-export default function GameDetails() {
+export default function GameDetails({
+    user,
+}) {
     const { gameId } = useParams();
     const navigate = useNavigate();
     const [game, setGame] = useState(null);
@@ -74,11 +77,24 @@ export default function GameDetails() {
                     </div>
                 </div>
 
-                {/* Edit/Delete buttons (Only for creator of this game) */}
-                <div className="buttons">
-                    <Link to={`/games/${gameId}/edit`} className="button">Edit</Link>
-                    <a href="#" className="button" onClick={deleteGameClickHandler}>Delete</a>
-                </div>
+                {user && (
+                    <div className="buttons">
+                        <Link
+                            to={`/games/${gameId}/edit`}
+                            className="button"
+                        >
+                            Edit
+                        </Link>
+
+                        <button
+                            type="button"
+                            className="button"
+                            onClick={deleteGameClickHandler}
+                        >
+                            Delete
+                        </button>
+                    </div>
+                )}
 
                 <div className="details-comments">
                     <h2>Comments:</h2>
@@ -101,25 +117,8 @@ export default function GameDetails() {
                     {/* <p className="no-comment">No comments.</p> */}
                 </div>
             </div>
-
-            {/* Add Comment (Only for logged-in non-creators) */}
-            <article className="create-comment">
-                <label htmlFor="comment">Add new comment:</label>
-
-                <form className="form">
-                    <textarea
-                        id="comment"
-                        name="comment"
-                        placeholder="Comment......"
-                    />
-
-                    <input
-                        className="btn submit"
-                        type="submit"
-                        value="Add Comment"
-                    />
-                </form>
-            </article>
+            
+            {user && <CreateComment user={user} gameId={gameId} />}
         </section>
     );
 }

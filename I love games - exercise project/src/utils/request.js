@@ -1,15 +1,22 @@
 
 const url = "https://wtqjbplnkqgkwhcxxwja.supabase.co/rest/v1/";
 
-export default async function request(path = "/", method = "GET", data = null, opts = {}) {
+export default async function request(
+    path = "/",
+    method = "GET",
+    data = null,
+    opts = {}
+) {
     const options = {
+        ...opts,
         method,
         headers: {
             apikey: import.meta.env.VITE_API_KEY,
+            ...opts.headers,
         }
     };
 
-    if (data) {
+    if (data !== null) {
         options.headers["Content-Type"] = "application/json";
         options.body = JSON.stringify(data);
     }
@@ -20,14 +27,20 @@ export default async function request(path = "/", method = "GET", data = null, o
     );
 
     if (!response.ok) {
-        const error = await response.text();
-        console.error("Supabase error:", error);
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+
+        console.error("Supabase error:", errorText);
+
+        throw new Error(
+            `HTTP ${response.status}: ${errorText}`
+        );
     }
 
-    if (response.status === 204) {
+    const responseText = await response.text();
+
+    if (!responseText) {
         return null;
     }
 
-    return response.json();
+    return JSON.parse(responseText);
 }

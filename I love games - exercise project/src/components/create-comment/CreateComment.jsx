@@ -1,35 +1,50 @@
+
 import request from "../../utils/request";
 
-export default function CreateComment({
-    user,
-    gameId,
-}) {
-    const addCommentAction = async (FormData) => {
-        const newComment = {
-            text: FormData.get('text'),
-            author: 'user?.email',
-            game_id: 'gameId'
+export default function CreateComment({ user, gameId }) {
+
+    const addCommentAction = async (formData) => {
+        const text = formData.get("text")?.trim();
+
+        if (!text) {
+            alert("Comment cannot be empty!");
+            return;
         }
-        await request('/comments', 'POST', )
+
+        const newComment = {
+            text,
+            author: user?.email,
+            game_id: gameId
+        };
+
+        try {
+            await request("/comments", "POST", newComment);
+
+            console.log("Comment added successfully!");
+        } catch (error) {
+            console.error("Error adding comment:", error);
+            alert("Failed to add comment!");
+        }
     };
 
     return (
         <article className="create-comment">
-                <label htmlFor="comment">Add new comment:</label>
+            <label htmlFor="comment">Add new comment:</label>
 
-                <form className="form" action={addCommentAction}>
-                    <textarea
-                        id="comment"
-                        name="comment"
-                        placeholder="Comment......"
-                    />
+            <form className="form" action={addCommentAction}>
+                <textarea
+                    id="comment"
+                    name="text"
+                    placeholder="Comment......"
+                    required
+                />
 
-                    <input
-                        className="btn submit"
-                        type="submit"
-                        value="Add Comment"
-                    />
-                </form>
-            </article>
+                <input
+                    className="btn submit"
+                    type="submit"
+                    value="Add Comment"
+                />
+            </form>
+        </article>
     );
 }

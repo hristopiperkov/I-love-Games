@@ -1,5 +1,6 @@
+
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import request from "../../utils/request";
 
 const initialValues = {
@@ -7,12 +8,14 @@ const initialValues = {
     genre: "",
     activePlayers: "",
     releaseDate: "",
-    imageUrl: "",
+    imgUrl: "",
     summary: ""
 };
 
 export default function GameEdit() {
     const { gameId } = useParams();
+    const navigate = useNavigate();
+
     const [game, setGame] = useState(initialValues);
 
     const changeHandler = (e) => {
@@ -24,13 +27,43 @@ export default function GameEdit() {
 
     useEffect(() => {
         request(`/games?id=eq.${gameId}`)
-        .then(data => setGame(data[0]))
+            .then(data => {
+                if (!data.length) {
+                    throw new Error("Game not found");
+                }
+
+                setGame({
+                    title: data[0].title ?? "",
+                    genre: data[0].genre ?? "",
+                    activePlayers: data[0].activePlayers ?? "",
+                    releaseDate: data[0].releaseDate ?? "",
+                    imgUrl: data[0].imgUrl ?? "",
+                    summary: data[0].summary ?? ""
+                });
+            })
+            .catch(error => {
+                console.error("Error loading game:", error);
+            });
     }, [gameId]);
+
+    const editAction = async () => {
+        try {
+            await request(`/games?id=eq.${gameId}`, "PATCH", {
+                ...game,
+                activePlayers: Number(game.activePlayers)
+            });
+
+            navigate(`/games/${gameId}`);
+        } catch (error) {
+            console.error("Error updating game:", error);
+            alert("Failed to update game. Please try again.");
+        }
+    };
+
     return (
         <section id="edit-page">
-            <form id="add-new-game">
+            <form id="add-new-game" action={editAction}>
                 <div className="container">
-
                     <h1>Edit Game</h1>
 
                     <div className="form-group-half">
@@ -42,6 +75,7 @@ export default function GameEdit() {
                             placeholder="Enter game title..."
                             value={game.title}
                             onChange={changeHandler}
+                            required
                         />
                     </div>
 
@@ -54,6 +88,7 @@ export default function GameEdit() {
                             placeholder="Enter game genre..."
                             value={game.genre}
                             onChange={changeHandler}
+                            required
                         />
                     </div>
 
@@ -64,9 +99,11 @@ export default function GameEdit() {
                             id="activePlayers"
                             name="activePlayers"
                             min="0"
+                            step="1"
                             placeholder="0"
                             value={game.activePlayers}
                             onChange={changeHandler}
+                            required
                         />
                     </div>
 
@@ -78,6 +115,7 @@ export default function GameEdit() {
                             name="releaseDate"
                             value={game.releaseDate}
                             onChange={changeHandler}
+                            required
                         />
                     </div>
 
@@ -90,6 +128,7 @@ export default function GameEdit() {
                             placeholder="Enter image URL..."
                             value={game.imgUrl}
                             onChange={changeHandler}
+                            required
                         />
                     </div>
 
@@ -102,7 +141,8 @@ export default function GameEdit() {
                             placeholder="Write a brief summary..."
                             value={game.summary}
                             onChange={changeHandler}
-                        ></textarea>
+                            required
+                        />
                     </div>
 
                     <input
@@ -110,7 +150,6 @@ export default function GameEdit() {
                         type="submit"
                         value="EDIT GAME"
                     />
-
                 </div>
             </form>
         </section>

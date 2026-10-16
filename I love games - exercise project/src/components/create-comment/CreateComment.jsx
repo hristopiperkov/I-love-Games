@@ -1,7 +1,13 @@
 
+import { useState } from "react";
 import request from "../../utils/request";
 
-export default function CreateComment({ user, gameId }) {
+export default function CreateComment({
+    user,
+    gameId,
+    onCommentAdded
+}) {
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const addCommentAction = async (formData) => {
         const text = formData.get("text")?.trim();
@@ -11,19 +17,32 @@ export default function CreateComment({ user, gameId }) {
             return;
         }
 
+        if (!user?.email) {
+            alert("You must be logged in to comment.");
+            return;
+        }
+
         const newComment = {
             text,
-            author: user?.email,
+            author: user.email,
             game_id: gameId
         };
+
+        setIsSubmitting(true);
 
         try {
             await request("/comments", "POST", newComment);
 
             console.log("Comment added successfully!");
+
+            if (onCommentAdded) {
+                await onCommentAdded();
+            }
         } catch (error) {
             console.error("Error adding comment:", error);
-            alert("Failed to add comment!");
+            alert(error.message);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -42,7 +61,8 @@ export default function CreateComment({ user, gameId }) {
                 <input
                     className="btn submit"
                     type="submit"
-                    value="Add Comment"
+                    value={isSubmitting ? "Sending..." : "Add Comment"}
+                    disabled={isSubmitting}
                 />
             </form>
         </article>

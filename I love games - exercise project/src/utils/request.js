@@ -1,5 +1,5 @@
 
-const url = "https://wtqjbplnkqgkwhcxxwja.supabase.co/rest/v1";
+const url = "https://wtqjbplnkqgkwhcxxwja.supabase.co/rest/v1/";
 
 export default async function request(
     path = "/",
@@ -12,7 +12,7 @@ export default async function request(
         method,
         headers: {
             apikey: import.meta.env.VITE_API_KEY,
-            ...opts.headers,
+            ...opts.headers
         }
     };
 
@@ -26,21 +26,13 @@ export default async function request(
         options
     );
 
+    const responseText = await response.text();
+
     if (!response.ok) {
-        const errorText = await response.text();
-
-        console.error("Supabase error:", errorText);
-
         throw new Error(
-            `HTTP ${response.status}: ${errorText}`
+            `HTTP ${response.status}: ${responseText}`
         );
     }
 
-    const responseText = await response.text();
-
-    if (!responseText) {
-        return null;
-    }
-
-    return JSON.parse(responseText);
+    return responseText ? JSON.parse(responseText) : null;
 }

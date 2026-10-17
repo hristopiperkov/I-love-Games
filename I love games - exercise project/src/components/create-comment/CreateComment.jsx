@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import request from "../../utils/request";
 
 export default function CreateComment({
     user,
     gameId,
-    onCommentAdded
+    onCommentAdded,
 }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -25,7 +24,7 @@ export default function CreateComment({
         const newComment = {
             text,
             author: user.email,
-            game_id: gameId
+            game_id: gameId,
         };
 
         setIsSubmitting(true);
@@ -33,11 +32,8 @@ export default function CreateComment({
         try {
             await request("/comments", "POST", newComment);
 
-            console.log("Comment added successfully!");
+            onCommentAdded();
 
-            if (onCommentAdded) {
-                await onCommentAdded();
-            }
         } catch (error) {
             console.error("Error adding comment:", error);
             alert(error.message);
@@ -48,9 +44,14 @@ export default function CreateComment({
 
     return (
         <article className="create-comment">
-            <label htmlFor="comment">Add new comment:</label>
+            <label htmlFor="comment">
+                Add new comment:
+            </label>
 
-            <form className="form" action={addCommentAction}>
+            <form
+                className="form"
+                action={addCommentAction}
+            >
                 <textarea
                     id="comment"
                     name="text"

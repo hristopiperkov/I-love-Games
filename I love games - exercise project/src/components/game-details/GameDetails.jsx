@@ -4,13 +4,12 @@ import request from "../../utils/request";
 import CreateComment from "../create-comment/CreateComment";
 import CommentsList from "../comments-list/CommentsList";
 
-export default function GameDetails({
-    user,
-}) {
+export default function GameDetails({ user }) {
     const { gameId } = useParams();
     const navigate = useNavigate();
+
     const [game, setGame] = useState(null);
-    const [refresh, setRefresh] = useState(false);
+    const [commentsRefresh, setCommentsRefresh] = useState(0);
 
     useEffect(() => {
         request(`/games?id=eq.${gameId}`)
@@ -20,33 +19,38 @@ export default function GameDetails({
             .catch(error => console.error(error));
     }, [gameId]);
 
-    if (!game) {
-        return <p>Loading game details or game not found...</p>;
-    }
-
     const deleteGameClickHandler = async (e) => {
         e.preventDefault();
 
-        const confirmed = confirm(`Are you sure you want to delete ${game.title} game?`);
+        const confirmed = window.confirm(
+            `Are you sure you want to delete ${game.title} game?`
+        );
 
         if (!confirmed) {
             return;
         }
-        
+
         try {
-            await request(`/games?id=eq.${gameId}`, 'DELETE');
-            
-            navigate('/catalog');
-        } catch (err) {
-            alert(err);
+            await request(`/games?id=eq.${gameId}`, "DELETE");
+            navigate("/catalog");
+        } catch (error) {
+            alert(error.message);
         }
+    };
+
+    const onCommentAdded = () => {
+        setCommentsRefresh(prev => prev + 1);
+    };
+
+    if (!game) {
+        return <p>Loading game details or game not found...</p>;
     }
-    
+
     return (
         <section id="game-details">
             <h1>Game Details</h1>
-            <div className="info-section">
 
+            <div className="info-section">
                 <div className="header-and-image">
                     <img
                         className="game-img"
@@ -55,7 +59,9 @@ export default function GameDetails({
                     />
 
                     <div className="meta-info">
-                        <h1 className="game-name">{game.title}</h1>
+                        <h1 className="game-name">
+                            {game.title}
+                        </h1>
 
                         <p className="data-row">
                             <span className="label">Genre:</span>
@@ -64,18 +70,24 @@ export default function GameDetails({
 
                         <p className="data-row">
                             <span className="label">Active Players:</span>
-                            <span className="value">{game.activePlayers}</span>
+                            <span className="value">
+                                {game.activePlayers}
+                            </span>
                         </p>
 
                         <p className="data-row">
                             <span className="label">Release Date:</span>
-                            <span className="value">{game.releaseDate}</span>
+                            <span className="value">
+                                {game.releaseDate}
+                            </span>
                         </p>
                     </div>
 
                     <div className="summary-section">
                         <h2>Summary:</h2>
-                        <p className="text-summary">{game.summary}</p>
+                        <p className="text-summary">
+                            {game.summary}
+                        </p>
                     </div>
                 </div>
 
@@ -98,11 +110,19 @@ export default function GameDetails({
                     </div>
                 )}
 
-                <CommentsList gameId={gameId} refresh={refresh} />
-
+                <CommentsList
+                    gameId={gameId}
+                    refresh={commentsRefresh}
+                />
             </div>
-            
-            {user && <CreateComment user={user} gameId={gameId} onCreate={() => setRefresh(state => !state)} />}
+
+            {user && (
+                <CreateComment
+                    user={user}
+                    gameId={gameId}
+                    onCommentAdded={onCommentAdded}
+                />
+            )}
         </section>
     );
 }

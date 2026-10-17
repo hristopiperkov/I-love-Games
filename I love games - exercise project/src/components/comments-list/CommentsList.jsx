@@ -1,23 +1,64 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import request from "../../utils/request";
 import CommentItem from "./comment-item/CommentItem";
 
 export default function CommentsList({
     gameId,
-    refresh
+    refresh,
 }) {
     const [comments, setComments] = useState([]);
-    
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
-        request(`/comments?game_id=eq.${gameId}&order=created_at.desc`)
-            .then(result => setComments(result))
+        let cancelled = false;
+
+        const fetchComments = async () => {
+            setLoading(true);
+
+            try {
+                const result = await request(
+                    `/comments?game_id=eq.${gameId}&order=created_at.desc`
+                );
+
+                if (!cancelled) {
+                    setComments(result ?? []);
+                }
+            } catch (error) {
+                console.error("Error fetching comments:", error);
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        fetchComments();
+
+        return () => {
+            cancelled = true;
+        };
     }, [gameId, refresh]);
+
     return (
         <div className="details-comments">
             <h2>Comments:</h2>
-            <ul>
-                {comments.map(comment => <CommentItem key={comment.id} {...comment} />)}
-            </ul>
+
+            {loading ? (
+                <p>Loading comments...</p>
+            ) : comments.length > 0 ? (
+                <ul>
+                    {comments.map(comment => (
+                        <CommentItem
+                            key={comment.id}
+                            {...comment}
+                        />
+                    ))}
+                </ul>
+            ) : (
+                <p className="no-comment">
+                    No comments.
+                </p>
+            )}
         </div>
     );
 }

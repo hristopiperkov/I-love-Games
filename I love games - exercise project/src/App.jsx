@@ -13,14 +13,14 @@ import Logout from "./components/logout/Logout";
 import { register, login } from "./api/auth-api";
 
 export default function App() {
-    const [user, setUser] = useState(null);
+    const [auth, setAuth] = useState(null);
 
     const userRegisterHandler = async (userData) => {
         const result = await register(userData);
 
         // Supabase creates a session immediately only if confirmation is not required.
         if (result.session) {
-            setUser(result.user);
+            setAuth(result.user);
         }
 
         return result;

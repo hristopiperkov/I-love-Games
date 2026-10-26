@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import request from "../../utils/request";
+import { gameApi } from "../../api/game-api";
 import GameCard from "../game-card/GameCard";
 
 export default function Catalog() {
@@ -7,7 +7,7 @@ export default function Catalog() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    request("/games?order=created_at.desc")
+   gameApi.getAll()
       .then(setGames)
       .catch((err) => console.error("Failed to fetch games:", err))
       .finally(() => setLoading(false));

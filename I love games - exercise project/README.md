@@ -1,16 +1,17 @@
-# React + Vite
+# I Love Games
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite project using **your Supabase project** `wtqjbplnkqgkwhcxxwja` via Supabase REST and Auth APIs. The UI and existing routes are retained.
 
-Currently, two official plugins are available:
+## Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Open `.env.local` beside `package.json` and replace the `VITE_API_KEY` placeholder with the **Publishable key** from your Supabase project's [API Keys settings](https://supabase.com/dashboard/project/wtqjbplnkqgkwhcxxwja/settings/api-keys).
+2. Run:
 
-## React Compiler
+```bash
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The short key provided earlier is **not** a Supabase publishable or legacy anon key. You'll need the actual one from Supabase. **Do not use a secret/service_role key in React.**
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+See [SETUP-SUPABASE.md](SETUP-SUPABASE.md) for schema details, authorization limitations, and troubleshooting. The database and its RLS policies have not been changed.

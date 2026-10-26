@@ -1,33 +1,40 @@
-import { useEffect, useState } from "react";
-import { gameApi } from "../../api/game-api";
+import { useContext, useEffect, useState } from "react";
 import GameCard from "../game-card/GameCard";
+import { gameApi } from "../../api";
+import AuthContext from "../../contexts/auth-context";
 
 export default function Catalog() {
-  const [games, setGames] = useState([]);
-  const [loading, setLoading] = useState(true);
+    const { accessToken } = useContext(AuthContext);
+    const [games, setGames] = useState([]);
+    const [error, setError] = useState(null);
 
-  useEffect(() => {
-   gameApi.getAll()
-      .then(setGames)
-      .catch((err) => console.error("Failed to fetch games:", err))
-      .finally(() => setLoading(false));
-  }, []);
+    useEffect(() => {
+        let active = true;
+        gameApi.getAll(accessToken)
+            .then(result => {
+                if (active) {
+                    setGames(result ?? []);
+                    setError(null);
+                }
+            })
+            .catch(err => {
+                if (active) setError(err.message);
+            });
+        return () => { active = false; };
+    }, [accessToken]);
 
-  return (
-    <section id="catalog-page">
-      <h1>Catalog</h1>
-
-      {loading ? (
-        <p>Loading games...</p>
-      ) : games.length > 0 ? (
-        <div className="catalog-container">
-          {games.map((game) => (
-            <GameCard key={game.id} {...game} />
-          ))}
-        </div>
-      ) : (
-        <h3 className="no-articles">No Added Games Yet</h3>
-      )}
-    </section>
-  );
+    return (
+        <section id="catalog-page">
+            <h1>Catalog</h1>
+            <div className="catalog-container">
+                {error ? (
+                    <p role="alert">{error}</p>
+                ) : games.length > 0 ? (
+                    games.map(game => <GameCard key={game.id} {...game} />)
+                ) : (
+                    <h3 className="no-articles">No Added Games Yet</h3>
+                )}
+            </div>
+        </section>
+    );
 }

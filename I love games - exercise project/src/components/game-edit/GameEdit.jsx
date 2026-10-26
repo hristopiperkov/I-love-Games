@@ -1,7 +1,8 @@
-
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useContext, useEffect, useState } from "react";
+import { Navigate, useNavigate, useParams } from "react-router";
 import request from "../../utils/request";
+import { gameApi } from "../../api";
+import AuthContext from "../../contexts/auth-context";
 
 const initialValues = {
     title: "",
@@ -9,147 +10,79 @@ const initialValues = {
     activePlayers: "",
     releaseDate: "",
     imgUrl: "",
-    summary: ""
+    summary: "",
 };
 
 export default function GameEdit() {
+    const { accessToken, isAuthenticated } = useContext(AuthContext);
     const { gameId } = useParams();
+    const [game, setGame] = useState(initialValues);
+    const [loadError, setLoadError] = useState(null);
     const navigate = useNavigate();
 
-    const [game, setGame] = useState(initialValues);
-
     const changeHandler = (e) => {
-        setGame(state => ({
-            ...state,
-            [e.target.name]: e.target.value
-        }));
+        setGame(state => ({ ...state, [e.target.name]: e.target.value }));
     };
 
     useEffect(() => {
-        request(`/games?id=eq.${gameId}`)
+        if (!isAuthenticated) return;
+        const controller = new AbortController();
+        request(`/games?id=eq.${encodeURIComponent(gameId)}`, "GET", null, {
+            signal: controller.signal,
+            headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        })
             .then(data => {
-                if (!data.length) {
-                    throw new Error("Game not found");
-                }
-
-                setGame({
-                    title: data[0].title ?? "",
-                    genre: data[0].genre ?? "",
-                    activePlayers: data[0].activePlayers ?? "",
-                    releaseDate: data[0].releaseDate ?? "",
-                    imgUrl: data[0].imgUrl ?? "",
-                    summary: data[0].summary ?? ""
-                });
+                if (!data?.[0]) throw new Error("Game not found");
+                setGame({ ...initialValues, ...data[0] });
             })
             .catch(error => {
-                console.error("Error loading game:", error);
+                if (error.name !== "AbortError") setLoadError(error.message);
             });
-    }, [gameId]);
+        return () => controller.abort();
+    }, [gameId, isAuthenticated, accessToken]);
 
     const editAction = async () => {
         try {
-            await request(`/games?id=eq.${gameId}`, "PATCH", {
-                ...game,
-                activePlayers: Number(game.activePlayers)
-            });
-
+            await gameApi.update(gameId, game, accessToken);
             navigate(`/games/${gameId}`);
         } catch (error) {
-            console.error("Error updating game:", error);
-            alert("Failed to update game. Please try again.");
+            alert(error.message);
         }
     };
+
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    if (loadError) return <p role="alert">{loadError}</p>;
 
     return (
         <section id="edit-page">
             <form id="add-new-game" action={editAction}>
                 <div className="container">
                     <h1>Edit Game</h1>
-
                     <div className="form-group-half">
                         <label htmlFor="gameName">Game Name:</label>
-                        <input
-                            type="text"
-                            id="gameName"
-                            name="title"
-                            placeholder="Enter game title..."
-                            value={game.title}
-                            onChange={changeHandler}
-                            required
-                        />
+                        <input required type="text" id="gameName" name="title" placeholder="Enter game title..." value={game.title} onChange={changeHandler} />
                     </div>
-
                     <div className="form-group-half">
                         <label htmlFor="genre">Genre:</label>
-                        <input
-                            type="text"
-                            id="genre"
-                            name="genre"
-                            placeholder="Enter game genre..."
-                            value={game.genre}
-                            onChange={changeHandler}
-                            required
-                        />
+                        <input required type="text" id="genre" name="genre" placeholder="Enter game genre..." value={game.genre} onChange={changeHandler} />
                     </div>
-
                     <div className="form-group-half">
                         <label htmlFor="activePlayers">Active Players:</label>
-                        <input
-                            type="number"
-                            id="activePlayers"
-                            name="activePlayers"
-                            min="0"
-                            step="1"
-                            placeholder="0"
-                            value={game.activePlayers}
-                            onChange={changeHandler}
-                            required
-                        />
+                        <input required type="number" id="activePlayers" name="activePlayers" min="0" placeholder="0" value={game.activePlayers} onChange={changeHandler} />
                     </div>
-
                     <div className="form-group-half">
                         <label htmlFor="releaseDate">Release Date:</label>
-                        <input
-                            type="date"
-                            id="releaseDate"
-                            name="releaseDate"
-                            value={game.releaseDate}
-                            onChange={changeHandler}
-                            required
-                        />
+                        <input required type="date" id="releaseDate" name="releaseDate" value={game.releaseDate} onChange={changeHandler} />
                     </div>
-
                     <div className="form-group-full">
                         <label htmlFor="imgUrl">Image URL:</label>
-                        <input
-                            type="text"
-                            id="imgUrl"
-                            name="imgUrl"
-                            placeholder="Enter image URL..."
-                            value={game.imgUrl}
-                            onChange={changeHandler}
-                            required
-                        />
+                        <input required type="url" id="imgUrl" name="imgUrl" placeholder="Enter image URL..." value={game.imgUrl} onChange={changeHandler} />
                     </div>
-
                     <div className="form-group-full">
                         <label htmlFor="summary">Summary:</label>
-                        <textarea
-                            name="summary"
-                            id="summary"
-                            rows="5"
-                            placeholder="Write a brief summary..."
-                            value={game.summary}
-                            onChange={changeHandler}
-                            required
-                        />
+                        <textarea required name="summary" id="summary" rows="5" placeholder="Write a brief summary..." value={game.summary} onChange={changeHandler} />
                     </div>
-
-                    <input
-                        className="btn submit"
-                        type="submit"
-                        value="EDIT GAME"
-                    />
+                    <input className="btn submit" type="submit" value="EDIT GAME" />
                 </div>
             </form>
         </section>

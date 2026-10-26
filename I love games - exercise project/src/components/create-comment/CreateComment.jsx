@@ -1,70 +1,31 @@
-import { useState } from "react";
-import request from "../../utils/request";
+import { commentApi } from "../../api";
 
-export default function CreateComment({
-    user,
-    gameId,
-    onCommentAdded,
-}) {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
+export default function CreateComment({ user, accessToken, gameId, onCreate }) {
     const addCommentAction = async (formData) => {
         const text = formData.get("text")?.trim();
+        if (!text) return;
 
-        if (!text) {
-            alert("Comment cannot be empty!");
-            return;
-        }
-
-        if (!user?.email) {
-            alert("You must be logged in to comment.");
-            return;
-        }
-
+        // public.comments contains text, author and game_id, but NO user_id.
         const newComment = {
             text,
-            author: user.email,
+            author: user?.email || "Anonymous",
             game_id: gameId,
         };
 
-        setIsSubmitting(true);
-
         try {
-            await request("/comments", "POST", newComment);
-
-            onCommentAdded();
-
+            await commentApi.create(newComment, accessToken);
+            onCreate();
         } catch (error) {
-            console.error("Error adding comment:", error);
             alert(error.message);
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
     return (
         <article className="create-comment">
-            <label htmlFor="comment">
-                Add new comment:
-            </label>
-
-            <form
-                className="form"
-                action={addCommentAction}
-            >
-                <textarea
-                    id="comment"
-                    name="text"
-                    placeholder="Comment......"
-                    required
-                />
-
-                <input
-                    className="btn submit"
-                    type="submit"
-                    value={isSubmitting ? "Sending..." : "Add Comment"}
-                    disabled={isSubmitting}
-                />
+            <label htmlFor="new-comment">Add new comment:</label>
+            <form className="form" action={addCommentAction}>
+                <textarea id="new-comment" name="text" required placeholder="Comment......" />
+                <input className="btn submit" type="submit" value="Add Comment" />
             </form>
         </article>
     );

@@ -5,6 +5,7 @@ import CommentItem from "./comment-item/CommentItem";
 export default function CommentsList({
     gameId,
     refresh,
+    accessToken,
 }) {
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -17,7 +18,10 @@ export default function CommentsList({
 
             try {
                 const result = await request(
-                    `/comments?game_id=eq.${gameId}&order=created_at.desc`
+                    `/comments?game_id=eq.${encodeURIComponent(gameId)}&order=created_at.desc`,
+                    "GET", null, {
+                        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+                    }
                 );
 
                 if (!cancelled) {
@@ -37,7 +41,7 @@ export default function CommentsList({
         return () => {
             cancelled = true;
         };
-    }, [gameId, refresh]);
+    }, [gameId, refresh, accessToken]);
 
     return (
         <div className="details-comments">

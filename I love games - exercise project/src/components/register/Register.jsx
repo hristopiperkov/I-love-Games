@@ -1,28 +1,32 @@
-
 import { useNavigate } from "react-router";
 
 export default function Register({ onRegister }) {
     const navigate = useNavigate();
 
-    const registerHandler = (formData) => {
-        const email = formData.get("email")?.trim();
-        const password = formData.get("password");
-        const confirmPassword = formData.get("confirm-password");
+    const registerHandler = async (formData) => {
+    const email = formData.get("email")?.trim();
+    const password = formData.get("password");
+    const confirmPassword = formData.get("confirm-password");
 
-        if (!email || !password || !confirmPassword) {
-            alert("All fields are required!");
-            return;
-        }
+    if (!email || !password || !confirmPassword) {
+        alert("All fields are required!");
+        return;
+    }
 
-        if (password !== confirmPassword) {
-            alert("Passwords do not match!");
-            return;
-        }
+    if (password !== confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+    }
 
-        onRegister({ email });
+    try {
+        await onRegister({ email, password });
 
         navigate("/");
-    };
+    } catch (error) {
+        console.error("Registration failed:", error);
+        alert(error.message || "Registration failed!");
+    }
+};
 
     return (
         <section id="register-page" className="content auth">

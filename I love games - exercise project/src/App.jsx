@@ -10,12 +10,26 @@ import GameEdit from "./components/game-edit/GameEdit";
 import Register from "./components/register/Register";
 import Login from "./components/login/Login";
 import Logout from "./components/logout/Logout";
+import { register, login } from "./api/auth-api";
 
 export default function App() {
     const [user, setUser] = useState(null);
 
-    const userAuthHandler = (userData) => {
-        setUser(userData);
+    const userRegisterHandler = async (userData) => {
+        const result = await register(userData);
+
+        // Supabase creates a session immediately only if confirmation is not required.
+        if (result.session) {
+            setUser(result.user);
+        }
+
+        return result;
+    };
+
+    const userLoginHandler = async (userData) => {
+        const result = await login(userData);
+        setUser(result.user);
+        return result;
     };
 
     const userLogoutHandler = useCallback(() => {
@@ -32,8 +46,8 @@ export default function App() {
                 <Route path="/games/:gameId"element={<GameDetails user={user} />} />
                 <Route path="/games/create" element={<GameCreate />}/>
                 <Route path="/games/:gameId/edit"element={<GameEdit />} />
-                <Route path="/register" element={<Register onRegister={userAuthHandler} />} />
-                <Route path="/login" element={<Login onLogin={userAuthHandler} />} />
+                <Route path="/register" element={<Register onRegister={userRegisterHandler} />} />
+                <Route path="/login" element={<Login onLogin={userLoginHandler} />} />
                 <Route path="/logout" element={<Logout onLogout={userLogoutHandler} />} />
             </Routes>
 

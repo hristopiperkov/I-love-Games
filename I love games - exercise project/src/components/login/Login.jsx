@@ -1,10 +1,9 @@
-
 import { useNavigate } from "react-router";
 
 export default function Login({ onLogin }) {
     const navigate = useNavigate();
 
-    const submitAction = (formData) => {
+    const submitAction = async (formData) => {
         const { email, password } = Object.fromEntries(formData);
 
         if (!email || !password) {
@@ -12,9 +11,13 @@ export default function Login({ onLogin }) {
             return;
         }
 
-        onLogin({ email });
-
-        navigate("/");
+        try {
+            await onLogin({ email, password });
+            navigate("/");
+        } catch (error) {
+            console.error("Login failed:", error);
+            alert(error.message || "Login failed!");
+        }
     };
 
     return (

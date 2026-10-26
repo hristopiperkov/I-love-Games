@@ -1,12 +1,7 @@
+const restUrl = "https://wtqjbplnkqgkwhcxxwja.supabase.co/rest/v1/";
+const authUrl = "https://wtqjbplnkqgkwhcxxwja.supabase.co/auth/v1/";
 
-const url = "https://wtqjbplnkqgkwhcxxwja.supabase.co/rest/v1/";
-
-export default async function request(
-    path = "/",
-    method = "GET",
-    data = null,
-    opts = {}
-) {
+async function baseRequest(url, path = "/", method = "GET", data = null, opts = {}) {
     const options = {
         ...opts,
         method,
@@ -16,6 +11,10 @@ export default async function request(
         }
     };
 
+    if (method !== "GET") {
+        options.method = method;
+    }
+    
     if (data !== null) {
         options.headers["Content-Type"] = "application/json";
         options.body = JSON.stringify(data);
@@ -35,4 +34,13 @@ export default async function request(
     }
 
     return responseText ? JSON.parse(responseText) : null;
+
 }
+
+export default function request(path = "/", method = "GET", data = null, opts = {}) {
+    return baseRequest(restUrl, path, method, data, opts);
+}
+
+export const authRequest = async (path = "/", method = "GET", data = null, opts = {}) => {
+    return baseRequest(authUrl, path, method, data, opts);
+};
